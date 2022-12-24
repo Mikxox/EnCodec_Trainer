@@ -1,6 +1,8 @@
 # EnCodec_Trainer
 
-Implementation to add training function with loss to https://github.com/facebookresearch/encodec
+Implementation to add training function with loss to https://github.com/facebookresearch/encodec \
+Used audio_to_mel.py from https://github.com/descriptinc/melgan-neurips \
+Some minor adjustments to other code to add new model. \
 Only training.py is new code.
 
 ## Citation
