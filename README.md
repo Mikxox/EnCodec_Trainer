@@ -14,6 +14,13 @@ If you use the original code or results in your paper, please cite the original 
   journal={arXiv preprint arXiv:2210.13438},
   year={2022}
 }
+
+@article{Melgan,
+      title={MelGAN: Generative Adversarial Networks for Conditional Waveform Synthesis}, 
+      author={Kundan Kumar and Rithesh Kumar and Thibaukt de Boissiere and Lucas Gestin and Wei Zhen Teoh and Jose Sotelo and Alexandre de Brebisson and Yoshua Bengio and Aaron Courville},
+      journal={arXiv preprint arXiv:1910.06711},
+      year={2019}
+}
 ```
 
 Also citing the added training code if you use it is always appreciated.
