@@ -22,6 +22,15 @@ If you use the original code or results in your paper, please cite the original 
       journal={arXiv preprint arXiv:1910.06711},
       year={2019}
 }
+
+@misc{egmd,
+    title={Improving Perceptual Quality of Drum Transcription with the Expanded Groove MIDI Dataset},
+    author={Lee Callender and Curtis Hawthorne and Jesse Engel},
+    year={2020},
+    eprint={2004.00188},
+    archivePrefix={arXiv},
+    primaryClass={cs.SD},
+}
 ```
 
 Also citing the added training code if you use it is always appreciated.
