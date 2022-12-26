@@ -18,7 +18,7 @@ SAVE_LOCATION = f'{SAVE_FOLDER}batch{BATCH_SIZE}_cut{TENSOR_CUT}_' # appends epo
 if not os.path.exists(SAVE_FOLDER):
    os.makedirs(SAVE_FOLDER)
 
-def total_loss(model, frames, fmap_real, logits_fake, fmap_fake, wav1, wav2, sample_rate=24000):
+def total_loss(fmap_real, logits_fake, fmap_fake, wav1, wav2, sample_rate=24000):
     relu = torch.nn.ReLU()
     l1Loss = torch.nn.L1Loss(reduction='mean')
     l2Loss = torch.nn.MSELoss(reduction='mean')
@@ -30,11 +30,6 @@ def total_loss(model, frames, fmap_real, logits_fake, fmap_fake, wav1, wav2, sam
         for tt2 in range(len(fmap_real[tt1])):
             loss = loss + (l1Loss(fmap_real[tt1][tt2].detach(), fmap_fake[tt1][tt2]) * factor)
     loss = loss * (2/3)
-
-    for emb, _ in frames:
-        q = model.quantizer.forward(emb, model.sample_rate, model.bandwidth)
-        codes = model.quantizer.decode(model.quantizer.encode(emb, model.frame_rate, model.bandwidth))
-        loss = loss + q.penalty + l2Loss(codes, emb)
 
     for i in range(5, 11):
         fft = Audio2Mel(win_length=2 ** i, hop_length=2 ** i // 4, n_mel_channels=64, sampling_rate=sample_rate)
@@ -115,7 +110,7 @@ def training(max_epoch = 5, log_interval = 20, fixed_length = 0, tensor_cut=1000
             model.zero_grad()
             optimizer_disc.zero_grad()
             disc.zero_grad()
-            output, frames = model(input_wav)
+            output, loss_enc = model(input_wav)
 
             logits_real, fmap_real = disc(input_wav)
             if train_d:
@@ -129,6 +124,7 @@ def training(max_epoch = 5, log_interval = 20, fixed_length = 0, tensor_cut=1000
             logits_fake, fmap_fake = disc(output)
             loss = total_loss(model, frames, fmap_real, logits_fake, fmap_fake, input_wav, output)
             last_loss += loss.item()
+            loss_enc.backward(retain_graph=True)
             loss.backward()
             optimizer.step()
 

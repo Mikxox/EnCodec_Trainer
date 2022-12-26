@@ -180,13 +180,10 @@ class EncodecModel(nn.Module):
             assert len(encoded_frames) == 1
             return self._decode_frame(encoded_frames[0])
         
-        # print("decoding:")
         frames = []
         for frame in encoded_frames:
-            # print("next frame:")
             frames.append(self._decode_frame(frame))
 
-        # frames = [self._decode_frame(frame) for frame in encoded_frames]
         return _linear_overlap_add(frames, self.segment_stride or 1)
 
     def _decode_frame(self, encoded_frame: EncodedFrame) -> torch.Tensor:
@@ -201,9 +198,17 @@ class EncodecModel(nn.Module):
             out = out * scale.view(-1, 1, 1)
         return out
 
-    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, tp.List[EncodedFrame]]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, int]:
+        l2Loss = torch.nn.MSELoss(reduction='mean')
         frames = self.encode(x)
-        return self.decode(frames)[:, :, :x.shape[-1]], frames
+        loss_enc = torch.tensor([0.0], device=x.device, requires_grad=True)
+        codes = []
+        for emb, scale in frames:
+            qv = self.quantizer.forward(emb, self.sample_rate, self.bandwidth)
+            loss_enc = loss_enc + qv.penalty + l2Loss(qv.quantized, emb) ** 2
+            codes.append((qv.quantized, scale))
+
+        return self.decode(codes)[:, :, :x.shape[-1]], loss_enc
 
     def set_target_bandwidth(self, bandwidth: float):
         if bandwidth not in self.target_bandwidths:
