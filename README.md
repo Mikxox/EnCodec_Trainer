@@ -3,6 +3,7 @@
 Implementation to add training function with loss to https://github.com/facebookresearch/encodec \
 Used audio_to_mel.py from https://github.com/descriptinc/melgan-neurips \
 Some minor adjustments to other code to add new model. \
+Changes to the forward function in model.py to make training quantizer easier. \
 Only training.py & customAudioDataset.py is new code. \
 Download the used database e-gmd from https://magenta.tensorflow.org/datasets/e-gmd
 
