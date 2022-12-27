@@ -110,7 +110,7 @@ def training(max_epoch = 5, log_interval = 20, fixed_length = 0, tensor_cut=1000
             model.zero_grad()
             optimizer_disc.zero_grad()
             disc.zero_grad()
-            output, loss_enc = model(input_wav)
+            output, loss_enc, _ = model(input_wav)
 
             logits_real, fmap_real = disc(input_wav)
             if train_d:

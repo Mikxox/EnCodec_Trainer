@@ -198,17 +198,18 @@ class EncodecModel(nn.Module):
             out = out * scale.view(-1, 1, 1)
         return out
 
-    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, int]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, int, list[tuple[torch.Tensor, torch.Tensor]]]:
         l2Loss = torch.nn.MSELoss(reduction='mean')
         frames = self.encode(x)
         loss_enc = torch.tensor([0.0], device=x.device, requires_grad=True)
         codes = []
+        self.eval()
         for emb, scale in frames:
             qv = self.quantizer.forward(emb, self.sample_rate, self.bandwidth)
             loss_enc = loss_enc + qv.penalty + l2Loss(qv.quantized, emb) ** 2
             codes.append((qv.quantized, scale))
-
-        return self.decode(codes)[:, :, :x.shape[-1]], loss_enc
+        self.train()
+        return self.decode(codes)[:, :, :x.shape[-1]], loss_enc, frames
 
     def set_target_bandwidth(self, bandwidth: float):
         if bandwidth not in self.target_bandwidths:
