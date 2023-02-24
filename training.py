@@ -122,7 +122,7 @@ def training(max_epoch = 5, log_interval = 20, fixed_length = 0, tensor_cut=1000
                 last_loss = 0
 
             logits_fake, fmap_fake = disc(output)
-            loss = total_loss(model, frames, fmap_real, logits_fake, fmap_fake, input_wav, output)
+            loss = total_loss(fmap_real, logits_fake, fmap_fake, input_wav, output)
             last_loss += loss.item()
             loss_enc.backward(retain_graph=True)
             loss.backward()
