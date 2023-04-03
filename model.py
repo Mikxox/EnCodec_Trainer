@@ -89,7 +89,8 @@ class EncodecModel(nn.Module):
                  normalize: bool = False,
                  segment: tp.Optional[float] = None,
                  overlap: float = 0.01,
-                 name: str = 'unset'):
+                 name: str = 'unset',
+                 train_quantization: bool = False):
         super().__init__()
         self.bandwidth: tp.Optional[float] = None
         self.target_bandwidths = target_bandwidths
@@ -104,6 +105,7 @@ class EncodecModel(nn.Module):
         self.frame_rate = math.ceil(self.sample_rate / np.prod(self.encoder.ratios))
         self.name = name
         self.bits_per_codebook = int(math.log2(self.quantizer.bins))
+        self.train_quantization = train_quantization
         assert 2 ** self.bits_per_codebook == self.quantizer.bins, \
             "quantizer bins must be a power of 2."
 
@@ -203,12 +205,13 @@ class EncodecModel(nn.Module):
         frames = self.encode(x)
         loss_enc = torch.tensor([0.0], device=x.device, requires_grad=True)
         codes = []
-        self.eval()
+        is_training = self.training
+        self.train(self.train_quantization)
         for emb, scale in frames:
             qv = self.quantizer.forward(emb, self.sample_rate, self.bandwidth)
             loss_enc = loss_enc + qv.penalty + l2Loss(qv.quantized, emb) ** 2
             codes.append((qv.quantized, scale))
-        self.train()
+        self.train(is_training)
         return self.decode(codes)[:, :, :x.shape[-1]], loss_enc, frames
 
     def set_target_bandwidth(self, bandwidth: float):

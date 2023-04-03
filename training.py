@@ -86,6 +86,7 @@ def training(max_epoch = 5, log_interval = 20, fixed_length = 0, tensor_cut=1000
                 causal=False, model_norm='time_group_norm', audio_normalize=True,
                 segment=1., name='my_encodec_24khz')
     model.train()
+    model.train_quantization = True
     model.cuda()
     
     disc = MultiScaleSTFTDiscriminator(filters=32)
